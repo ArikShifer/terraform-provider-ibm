@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2017, 2021 All Rights Reserved.
+// Copyright IBM Corp. 2022 All Rights Reserved.
 // Licensed under the Mozilla Public License v2.0
 
 package provider
@@ -44,7 +44,7 @@ import (
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/service/pushnotification"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/service/registry"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/service/resourcecontroller"
-	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/service/resourcemanager"
+	//"github.com/IBM-Cloud/terraform-provider-ibm/ibm/service/resourcemanager"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/service/satellite"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/service/scc"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/service/schematics"
@@ -504,8 +504,8 @@ func Provider() *schema.Provider {
 			"ibm_app_config_feature":                 appconfiguration.DataSourceIBMAppConfigFeature(),
 			"ibm_app_config_features":                appconfiguration.DataSourceIBMAppConfigFeatures(),
 
-			"ibm_resource_quota":    resourcecontroller.DataSourceIBMResourceQuota(),
-			"ibm_resource_group":    resourcemanager.DataSourceIBMResourceGroup(),
+			"ibm_resource_quota": resourcecontroller.DataSourceIBMResourceQuota(),
+			//"ibm_resource_group":    resourcemanager.DataSourceIBMResourceGroup(),
 			"ibm_resource_instance": resourcecontroller.DataSourceIBMResourceInstance(),
 			"ibm_resource_key":      resourcecontroller.DataSourceIBMResourceKey(),
 			"ibm_security_group":    classicinfrastructure.DataSourceIBMSecurityGroup(),
@@ -597,8 +597,6 @@ func Provider() *schema.Provider {
 			"ibm_enterprise_accounts":       enterprise.DataSourceIBMEnterpriseAccounts(),
 
 			// //Added for Secrets Manager
-			"ibm_secrets_manager_secrets": secretsmanager.DataSourceIBMSecretsManagerSecrets(),
-			"ibm_secrets_manager_secret":  secretsmanager.DataSourceIBMSecretsManagerSecret(),
 
 			// //Added for Satellite
 			"ibm_satellite_location":                            satellite.DataSourceIBMSatelliteLocation(),
@@ -711,6 +709,8 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
+			"ibm_secret_group": secretsmanager.ResourceIbmSecretGroup(),
+
 			"ibm_api_gateway_endpoint":              apigateway.ResourceIBMApiGatewayEndPoint(),
 			"ibm_api_gateway_endpoint_subscription": apigateway.ResourceIBMApiGatewayEndpointSubscription(),
 			"ibm_app":                               cloudfoundry.ResourceIBMApp(),
@@ -947,22 +947,22 @@ func Provider() *schema.Provider {
 			"ibm_kms_key_rings":                                  kms.ResourceIBMKmskeyRings(),
 			"ibm_kms_key_policies":                               kms.ResourceIBMKmskeyPolicies(),
 			"ibm_kp_key":                                         kms.ResourceIBMkey(),
-			"ibm_resource_group":                                 resourcemanager.ResourceIBMResourceGroup(),
-			"ibm_resource_instance":                              resourcecontroller.ResourceIBMResourceInstance(),
-			"ibm_resource_key":                                   resourcecontroller.ResourceIBMResourceKey(),
-			"ibm_security_group":                                 classicinfrastructure.ResourceIBMSecurityGroup(),
-			"ibm_security_group_rule":                            classicinfrastructure.ResourceIBMSecurityGroupRule(),
-			"ibm_service_instance":                               cloudfoundry.ResourceIBMServiceInstance(),
-			"ibm_service_key":                                    cloudfoundry.ResourceIBMServiceKey(),
-			"ibm_space":                                          cloudfoundry.ResourceIBMSpace(),
-			"ibm_storage_evault":                                 classicinfrastructure.ResourceIBMStorageEvault(),
-			"ibm_storage_block":                                  classicinfrastructure.ResourceIBMStorageBlock(),
-			"ibm_storage_file":                                   classicinfrastructure.ResourceIBMStorageFile(),
-			"ibm_subnet":                                         classicinfrastructure.ResourceIBMSubnet(),
-			"ibm_dns_reverse_record":                             classicinfrastructure.ResourceIBMDNSReverseRecord(),
-			"ibm_ssl_certificate":                                classicinfrastructure.ResourceIBMSSLCertificate(),
-			"ibm_cdn":                                            classicinfrastructure.ResourceIBMCDN(),
-			"ibm_hardware_firewall_shared":                       classicinfrastructure.ResourceIBMFirewallShared(),
+			//"ibm_resource_group":                                 resourcemanager.ResourceIBMResourceGroup(),
+			"ibm_resource_instance":        resourcecontroller.ResourceIBMResourceInstance(),
+			"ibm_resource_key":             resourcecontroller.ResourceIBMResourceKey(),
+			"ibm_security_group":           classicinfrastructure.ResourceIBMSecurityGroup(),
+			"ibm_security_group_rule":      classicinfrastructure.ResourceIBMSecurityGroupRule(),
+			"ibm_service_instance":         cloudfoundry.ResourceIBMServiceInstance(),
+			"ibm_service_key":              cloudfoundry.ResourceIBMServiceKey(),
+			"ibm_space":                    cloudfoundry.ResourceIBMSpace(),
+			"ibm_storage_evault":           classicinfrastructure.ResourceIBMStorageEvault(),
+			"ibm_storage_block":            classicinfrastructure.ResourceIBMStorageBlock(),
+			"ibm_storage_file":             classicinfrastructure.ResourceIBMStorageFile(),
+			"ibm_subnet":                   classicinfrastructure.ResourceIBMSubnet(),
+			"ibm_dns_reverse_record":       classicinfrastructure.ResourceIBMDNSReverseRecord(),
+			"ibm_ssl_certificate":          classicinfrastructure.ResourceIBMSSLCertificate(),
+			"ibm_cdn":                      classicinfrastructure.ResourceIBMCDN(),
+			"ibm_hardware_firewall_shared": classicinfrastructure.ResourceIBMFirewallShared(),
 
 			// //Added for Power Colo
 
@@ -1135,6 +1135,7 @@ func Validator() validate.ValidatorDict {
 	initOnce.Do(func() {
 		globalValidatorDict = validate.ValidatorDict{
 			ResourceValidatorDictionary: map[string]*validate.ResourceValidator{
+				"ibm_secret_group":                secretsmanager.ResourceIbmSecretGroupValidator(),
 				"ibm_iam_account_settings":        iamidentity.ResourceIBMIAMAccountSettingsValidator(),
 				"ibm_iam_custom_role":             iampolicy.ResourceIBMIAMCustomRoleValidator(),
 				"ibm_cis_healthcheck":             cis.ResourceIBMCISHealthCheckValidator(),
@@ -1308,12 +1309,10 @@ func Validator() validate.ValidatorDict {
 				// bare_metal_server
 				"ibm_is_bare_metal_server": vpc.DataSourceIBMIsBareMetalServerValidator(),
 
-				"ibm_is_vpc":                  vpc.DataSourceIBMISVpcValidator(),
-				"ibm_is_volume":               vpc.DataSourceIBMISVolumeValidator(),
-				"ibm_scc_si_notes":            scc.DataSourceIBMSccSiNotesValidator(),
-				"ibm_scc_si_occurrences":      scc.DataSourceIBMSccSiOccurrencesValidator(),
-				"ibm_secrets_manager_secret":  secretsmanager.DataSourceIBMSecretsManagerSecretValidator(),
-				"ibm_secrets_manager_secrets": secretsmanager.DataSourceIBMSecretsManagerSecretsValidator(),
+				"ibm_is_vpc":             vpc.DataSourceIBMISVpcValidator(),
+				"ibm_is_volume":          vpc.DataSourceIBMISVolumeValidator(),
+				"ibm_scc_si_notes":       scc.DataSourceIBMSccSiNotesValidator(),
+				"ibm_scc_si_occurrences": scc.DataSourceIBMSccSiOccurrencesValidator(),
 			},
 		}
 	})
