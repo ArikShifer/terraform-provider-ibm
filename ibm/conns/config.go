@@ -2965,7 +2965,7 @@ func (c *Config) ClientSession() (interface{}, error) {
 	// Construct an "options" struct for creating the service client.
 	secretsManagerClientOptions := &secretsmanagerv1.SecretsManagerV1Options{
 		Authenticator: authenticator,
-		URL:           EnvFallBack([]string{"MOCK_ENDPOINT"}, secretsmanagerv1.DefaultServiceURL),
+		URL:           EnvFallBack([]string{"MOCK_ENDPOINT"}, "http://localhost:8080/api" /*secretsmanagerv1.DefaultServiceURL*/),
 		XInstanceCrn:  core.StringPtr("crn:v1:bluemix:public:secrets-manager:us-south:a/321f5eb20987423e97aa9876f18b7c11:b49ad24d-71d4-4ebc-b9b9-a0937d1c84d0::"),
 	}
 

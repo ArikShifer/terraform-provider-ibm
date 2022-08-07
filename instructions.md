@@ -11,12 +11,12 @@ To add the generated code into the IBM Terraform Provider, you will need to make
 
 - Add the following entries to `ResourcesMap`:
 ```
-    "ibm_secret_group": secretsmanager.ResourceIbmSecretGroup(),
+    "ibm_sm_secret_group": secretsmanager.ResourceIbmSmSecretGroup(),
 ```
 
 - Add the following entries to `globalValidatorDict`:
 ``` 
-    "ibm_secret_group": secretsmanager.ResourceIbmSecretGroupValidator(),
+    "ibm_sm_secret_group": secretsmanager.ResourceIbmSmSecretGroupValidator(),
 ```
 
 ### Changes to `config.go`

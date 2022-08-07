@@ -21,12 +21,12 @@ Run `terraform destroy` when you don't need these resources.
 
 ## SecretsManagerV1 resources
 
-secret_group resource:
+sm_secret_group resource:
 
 ```hcl
-resource "secret_group" "secret_group_instance" {
-  name = var.secret_group_name
-  description = var.secret_group_description
+resource "sm_secret_group" "sm_secret_group_instance" {
+  name = var.sm_secret_group_name
+  description = var.sm_secret_group_description
 }
 ```
 
@@ -65,4 +65,4 @@ resource "secret_group" "secret_group_instance" {
 
 | Name | Description |
 |------|-------------|
-| secret_group | secret_group object |
+| sm_secret_group | sm_secret_group object |
