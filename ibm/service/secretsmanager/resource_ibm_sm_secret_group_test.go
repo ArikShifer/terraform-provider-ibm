@@ -16,7 +16,7 @@ import (
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
 )
 
-func TestAccIbmSecretGroupBasic(t *testing.T) {
+func TestAccIbmSmSecretGroupBasic(t *testing.T) {
 	var conf secretsmanagerv1.SecretGroup
 	name := fmt.Sprintf("tf_name_%d", acctest.RandIntRange(10, 100))
 	nameUpdate := fmt.Sprintf("tf_name_%d", acctest.RandIntRange(10, 100))
@@ -24,26 +24,26 @@ func TestAccIbmSecretGroupBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acc.TestAccPreCheck(t) },
 		Providers:    acc.TestAccProviders,
-		CheckDestroy: testAccCheckIbmSecretGroupDestroy,
+		CheckDestroy: testAccCheckIbmSmSecretGroupDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccCheckIbmSecretGroupConfigBasic(name),
+				Config: testAccCheckIbmSmSecretGroupConfigBasic(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckIbmSecretGroupExists("ibm_secret_group.secret_group", conf),
-					resource.TestCheckResourceAttr("ibm_secret_group.secret_group", "name", name),
+					testAccCheckIbmSmSecretGroupExists("ibm_sm_secret_group.sm_secret_group", conf),
+					resource.TestCheckResourceAttr("ibm_sm_secret_group.sm_secret_group", "name", name),
 				),
 			},
 			resource.TestStep{
-				Config: testAccCheckIbmSecretGroupConfigBasic(nameUpdate),
+				Config: testAccCheckIbmSmSecretGroupConfigBasic(nameUpdate),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("ibm_secret_group.secret_group", "name", nameUpdate),
+					resource.TestCheckResourceAttr("ibm_sm_secret_group.sm_secret_group", "name", nameUpdate),
 				),
 			},
 		},
 	})
 }
 
-func TestAccIbmSecretGroupAllArgs(t *testing.T) {
+func TestAccIbmSmSecretGroupAllArgs(t *testing.T) {
 	var conf secretsmanagerv1.SecretGroup
 	name := fmt.Sprintf("tf_name_%d", acctest.RandIntRange(10, 100))
 	description := fmt.Sprintf("tf_description_%d", acctest.RandIntRange(10, 100))
@@ -53,25 +53,25 @@ func TestAccIbmSecretGroupAllArgs(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acc.TestAccPreCheck(t) },
 		Providers:    acc.TestAccProviders,
-		CheckDestroy: testAccCheckIbmSecretGroupDestroy,
+		CheckDestroy: testAccCheckIbmSmSecretGroupDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccCheckIbmSecretGroupConfig(name, description),
+				Config: testAccCheckIbmSmSecretGroupConfig(name, description),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckIbmSecretGroupExists("ibm_secret_group.secret_group", conf),
-					resource.TestCheckResourceAttr("ibm_secret_group.secret_group", "name", name),
-					resource.TestCheckResourceAttr("ibm_secret_group.secret_group", "description", description),
+					testAccCheckIbmSmSecretGroupExists("ibm_sm_secret_group.sm_secret_group", conf),
+					resource.TestCheckResourceAttr("ibm_sm_secret_group.sm_secret_group", "name", name),
+					resource.TestCheckResourceAttr("ibm_sm_secret_group.sm_secret_group", "description", description),
 				),
 			},
 			resource.TestStep{
-				Config: testAccCheckIbmSecretGroupConfig(nameUpdate, descriptionUpdate),
+				Config: testAccCheckIbmSmSecretGroupConfig(nameUpdate, descriptionUpdate),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("ibm_secret_group.secret_group", "name", nameUpdate),
-					resource.TestCheckResourceAttr("ibm_secret_group.secret_group", "description", descriptionUpdate),
+					resource.TestCheckResourceAttr("ibm_sm_secret_group.sm_secret_group", "name", nameUpdate),
+					resource.TestCheckResourceAttr("ibm_sm_secret_group.sm_secret_group", "description", descriptionUpdate),
 				),
 			},
 			resource.TestStep{
-				ResourceName:      "ibm_secret_group.secret_group",
+				ResourceName:      "ibm_sm_secret_group.sm_secret_group",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -79,26 +79,26 @@ func TestAccIbmSecretGroupAllArgs(t *testing.T) {
 	})
 }
 
-func testAccCheckIbmSecretGroupConfigBasic(name string) string {
+func testAccCheckIbmSmSecretGroupConfigBasic(name string) string {
 	return fmt.Sprintf(`
 
-		resource "ibm_secret_group" "secret_group" {
+		resource "ibm_sm_secret_group" "sm_secret_group" {
 			name = "%s"
 		}
 	`, name)
 }
 
-func testAccCheckIbmSecretGroupConfig(name string, description string) string {
+func testAccCheckIbmSmSecretGroupConfig(name string, description string) string {
 	return fmt.Sprintf(`
 
-		resource "ibm_secret_group" "secret_group" {
+		resource "ibm_sm_secret_group" "sm_secret_group" {
 			name = "%s"
 			description = "%s"
 		}
 	`, name, description)
 }
 
-func testAccCheckIbmSecretGroupExists(n string, obj secretsmanagerv1.SecretGroup) resource.TestCheckFunc {
+func testAccCheckIbmSmSecretGroupExists(n string, obj secretsmanagerv1.SecretGroup) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -125,13 +125,13 @@ func testAccCheckIbmSecretGroupExists(n string, obj secretsmanagerv1.SecretGroup
 	}
 }
 
-func testAccCheckIbmSecretGroupDestroy(s *terraform.State) error {
+func testAccCheckIbmSmSecretGroupDestroy(s *terraform.State) error {
 	secretsManagerClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).SecretsManagerV1()
 	if err != nil {
 		return err
 	}
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ibm_secret_group" {
+		if rs.Type != "ibm_sm_secret_group" {
 			continue
 		}
 

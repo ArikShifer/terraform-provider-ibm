@@ -17,25 +17,25 @@ import (
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/validate"
 )
 
-func ResourceIbmSecretGroup() *schema.Resource {
+func ResourceIbmSmSecretGroup() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceIbmSecretGroupCreate,
-		ReadContext:   resourceIbmSecretGroupRead,
-		UpdateContext: resourceIbmSecretGroupUpdate,
-		DeleteContext: resourceIbmSecretGroupDelete,
+		CreateContext: resourceIbmSmSecretGroupCreate,
+		ReadContext:   resourceIbmSmSecretGroupRead,
+		UpdateContext: resourceIbmSmSecretGroupUpdate,
+		DeleteContext: resourceIbmSmSecretGroupDelete,
 		Importer:      &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validate.InvokeValidator("ibm_secret_group", "name"),
+				ValidateFunc: validate.InvokeValidator("ibm_sm_secret_group", "name"),
 				Description:  "The name of your secret group.",
 			},
 			"description": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validate.InvokeValidator("ibm_secret_group", "description"),
+				ValidateFunc: validate.InvokeValidator("ibm_sm_secret_group", "description"),
 				Description:  "An extended description of your secret group.To protect your privacy, do not use personal data, such as your name or location, as a description for your secret group.",
 			},
 			"creation_date": &schema.Schema{
@@ -52,7 +52,7 @@ func ResourceIbmSecretGroup() *schema.Resource {
 	}
 }
 
-func ResourceIbmSecretGroupValidator() *validate.ResourceValidator {
+func ResourceIbmSmSecretGroupValidator() *validate.ResourceValidator {
 	validateSchema := make([]validate.ValidateSchema, 0)
 	validateSchema = append(validateSchema,
 		validate.ValidateSchema{
@@ -75,11 +75,11 @@ func ResourceIbmSecretGroupValidator() *validate.ResourceValidator {
 		},
 	)
 
-	resourceValidator := validate.ResourceValidator{ResourceName: "ibm_secret_group", Schema: validateSchema}
+	resourceValidator := validate.ResourceValidator{ResourceName: "ibm_sm_secret_group", Schema: validateSchema}
 	return &resourceValidator
 }
 
-func resourceIbmSecretGroupCreate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIbmSmSecretGroupCreate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
 	if err != nil {
 		return diag.FromErr(err)
@@ -100,10 +100,10 @@ func resourceIbmSecretGroupCreate(context context.Context, d *schema.ResourceDat
 
 	d.SetId(*secretGroup.ID)
 
-	return resourceIbmSecretGroupRead(context, d, meta)
+	return resourceIbmSmSecretGroupRead(context, d, meta)
 }
 
-func resourceIbmSecretGroupRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIbmSmSecretGroupRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
 	if err != nil {
 		return diag.FromErr(err)
@@ -139,7 +139,7 @@ func resourceIbmSecretGroupRead(context context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceIbmSecretGroupUpdate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIbmSmSecretGroupUpdate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
 	if err != nil {
 		return diag.FromErr(err)
@@ -168,10 +168,10 @@ func resourceIbmSecretGroupUpdate(context context.Context, d *schema.ResourceDat
 		}
 	}
 
-	return resourceIbmSecretGroupRead(context, d, meta)
+	return resourceIbmSmSecretGroupRead(context, d, meta)
 }
 
-func resourceIbmSecretGroupDelete(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIbmSmSecretGroupDelete(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
 	if err != nil {
 		return diag.FromErr(err)

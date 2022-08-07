@@ -709,7 +709,7 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"ibm_secret_group": secretsmanager.ResourceIbmSecretGroup(),
+			"ibm_sm_secret_group": secretsmanager.ResourceIbmSmSecretGroup(),
 
 			"ibm_api_gateway_endpoint":              apigateway.ResourceIBMApiGatewayEndPoint(),
 			"ibm_api_gateway_endpoint_subscription": apigateway.ResourceIBMApiGatewayEndpointSubscription(),
@@ -1135,7 +1135,7 @@ func Validator() validate.ValidatorDict {
 	initOnce.Do(func() {
 		globalValidatorDict = validate.ValidatorDict{
 			ResourceValidatorDictionary: map[string]*validate.ResourceValidator{
-				"ibm_secret_group":                secretsmanager.ResourceIbmSecretGroupValidator(),
+				"ibm_sm_secret_group":             secretsmanager.ResourceIbmSmSecretGroupValidator(),
 				"ibm_iam_account_settings":        iamidentity.ResourceIBMIAMAccountSettingsValidator(),
 				"ibm_iam_custom_role":             iampolicy.ResourceIBMIAMCustomRoleValidator(),
 				"ibm_cis_healthcheck":             cis.ResourceIBMCISHealthCheckValidator(),

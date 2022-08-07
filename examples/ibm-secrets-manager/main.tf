@@ -2,8 +2,8 @@ provider "ibm" {
   ibmcloud_api_key = var.ibmcloud_api_key
 }
 
-// Provision secret_group resource instance
-resource "ibm_secret_group" "secret_group_instance" {
-  name = var.secret_group_name
-  description = var.secret_group_description
+// Provision sm_secret_group resource instance
+resource "ibm_sm_secret_group" "sm_secret_group_instance" {
+  name = var.sm_secret_group_name
+  description = var.sm_secret_group_description
 }

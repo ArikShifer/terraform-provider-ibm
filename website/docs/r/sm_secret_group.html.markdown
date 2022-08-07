@@ -1,19 +1,19 @@
 ---
 layout: "ibm"
-page_title: "IBM : ibm_secret_group"
+page_title: "IBM : ibm_sm_secret_group"
 description: |-
   Manages SecretGroup.
 subcategory: "IBM Cloud Secrets Manager Basic API"
 ---
 
-# ibm_secret_group
+# ibm_sm_secret_group
 
 Provides a resource for SecretGroup. This allows SecretGroup to be created, updated and deleted.
 
 ## Example Usage
 
 ```hcl
-resource "ibm_secret_group" "secret_group" {
+resource "ibm_sm_secret_group" "sm_secret_group" {
   description = "Extended description for this group."
   name = "my-secret-group"
 }
@@ -88,15 +88,15 @@ For more informaton, see [here](https://registry.terraform.io/providers/IBM-Clou
 
 ## Import
 
-You can import the `ibm_secret_group` resource by using `id`. A v4 UUID identifier.
+You can import the `ibm_sm_secret_group` resource by using `id`. A v4 UUID identifier.
 For more information, see [the documentation](https://cloud.ibm.com/docs/secrets-manager)
 
 # Syntax
 ```
-$ terraform import ibm_secret_group.secret_group <id>
+$ terraform import ibm_sm_secret_group.sm_secret_group <id>
 ```
 
 # Example
 ```
-$ terraform import ibm_secret_group.secret_group b49ad24d-81d4-5ebc-b9b9-b0937d1c84d5
+$ terraform import ibm_sm_secret_group.sm_secret_group b49ad24d-81d4-5ebc-b9b9-b0937d1c84d5
 ```
