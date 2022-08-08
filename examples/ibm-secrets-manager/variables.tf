@@ -14,3 +14,5 @@ variable "sm_secret_group_description" {
   type        = string
   default     = "Extended description for this group."
 }
+
+// Resource arguments for sm_secret

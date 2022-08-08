@@ -5,6 +5,7 @@ This example illustrates how to use the SecretsManagerV1
 These types of resources are supported:
 
 * SecretGroup
+* sm_secret
 
 ## Usage
 
@@ -27,6 +28,13 @@ sm_secret_group resource:
 resource "sm_secret_group" "sm_secret_group_instance" {
   name = var.sm_secret_group_name
   description = var.sm_secret_group_description
+}
+```
+sm_secret resource:
+
+```hcl
+resource "sm_secret" "sm_secret_instance" {
+  secret_prototype = var.sm_secret_secret_prototype
 }
 ```
 
@@ -60,9 +68,11 @@ resource "sm_secret_group" "sm_secret_group_instance" {
 | ibmcloud\_api\_key | IBM Cloud API key | `string` | true |
 | name | The name of your secret group. | `string` | true |
 | description | An extended description of your secret group.To protect your privacy, do not use personal data, such as your name or location, as a description for your secret group. | `string` | false |
+| secret_prototype | Specify the properties for your secret. | `` | true |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
 | sm_secret_group | sm_secret_group object |
+| sm_secret | sm_secret object |
