@@ -1053,12 +1053,9 @@ func (sess clientSession) ResourceControllerV2API() (*resourcecontroller.Resourc
 	return sess.resourceControllerAPI, sess.resourceControllerErr
 }
 
-// SecretsManager Session
+// IBM Cloud Secrets Manager Basic API
 func (session clientSession) SecretsManagerV1() (*secretsmanagerv1.SecretsManagerV1, error) {
-	if session.secretsManagerClientErr != nil {
-		return session.secretsManagerClient, session.secretsManagerClientErr
-	}
-	return session.secretsManagerClient.Clone(), nil
+	return session.secretsManagerClient, session.secretsManagerClientErr
 }
 
 // Satellite Link
@@ -2963,14 +2960,13 @@ func (c *Config) ClientSession() (interface{}, error) {
 
 	// SECRETS MANAGER Service
 	// Construct an "options" struct for creating the service client.
+	fmt.Printf("TF configuration %+v\\n", c)
 	secretsManagerClientOptions := &secretsmanagerv1.SecretsManagerV1Options{
 		Authenticator: authenticator,
-		URL:           EnvFallBack([]string{"MOCK_ENDPOINT"}, "http://localhost:8080/api" /*secretsmanagerv1.DefaultServiceURL*/),
-		XInstanceCrn:  core.StringPtr("crn:v1:bluemix:public:secrets-manager:us-south:a/321f5eb20987423e97aa9876f18b7c11:b49ad24d-71d4-4ebc-b9b9-a0937d1c84d0::"),
 	}
 
 	// Construct the service client.
-	session.secretsManagerClient, err = secretsmanagerv1.NewSecretsManagerV1(secretsManagerClientOptions)
+	session.secretsManagerClient, err = secretsmanagerv1.NewSecretsManagerV1UsingExternalConfig(secretsManagerClientOptions)
 	if err == nil {
 		// Enable retries for API calls
 		session.secretsManagerClient.Service.EnableRetries(c.RetryCount, c.RetryDelay)
