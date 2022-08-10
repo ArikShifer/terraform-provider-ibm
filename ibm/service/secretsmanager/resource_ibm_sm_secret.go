@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/IBM-Cloud/secrets-manager-mt-go-sdk/secretsmanagerv1"
+	"github.com/IBM-Cloud/secrets-manager-mt-go-sdk/secretsmanagerv2"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/flex"
 	"github.com/IBM/go-sdk-core/v5/core"
@@ -210,12 +210,12 @@ func ResourceIbmSmSecret() *schema.Resource {
 }
 
 func resourceIbmSmSecretCreate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
+	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	createSecretOptions := &secretsmanagerv1.CreateSecretOptions{}
+	createSecretOptions := &secretsmanagerv2.CreateSecretOptions{}
 
 	secretPrototypeModel, err := resourceIbmSmSecretMapToSecretPrototype(d.Get("secret_prototype.0").(map[string]interface{}))
 	if err != nil {
@@ -229,19 +229,19 @@ func resourceIbmSmSecretCreate(context context.Context, d *schema.ResourceData, 
 		return diag.FromErr(fmt.Errorf("CreateSecretWithContext failed %s\n%s", err, response))
 	}
 
-	secret := secretIntf.(*secretsmanagerv1.ImportedCertificate)
+	secret := secretIntf.(*secretsmanagerv2.ImportedCertificate)
 	d.SetId(*secret.ID)
 
 	return resourceIbmSmSecretRead(context, d, meta)
 }
 
 func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
+	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	getSecretOptions := &secretsmanagerv1.GetSecretOptions{}
+	getSecretOptions := &secretsmanagerv2.GetSecretOptions{}
 
 	getSecretOptions.SetID(d.Id())
 
@@ -255,8 +255,8 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		return diag.FromErr(fmt.Errorf("GetSecretWithContext failed %s\n%s", err, response))
 	}
 
-	if _, ok := secretIntf.(*secretsmanagerv1.ImportedCertificate); ok {
-		secret := secretIntf.(*secretsmanagerv1.ImportedCertificate)
+	if _, ok := secretIntf.(*secretsmanagerv2.ImportedCertificate); ok {
+		secret := secretIntf.(*secretsmanagerv2.ImportedCertificate)
 		if err = d.Set("type", secret.Type); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting type: %s", err))
 		}
@@ -325,8 +325,8 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		if err = d.Set("private_key", secret.PrivateKey); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting private_key: %s", err))
 		}
-	} else if _, ok := secretIntf.(*secretsmanagerv1.PublicCertificate); ok {
-		secret := secretIntf.(*secretsmanagerv1.PublicCertificate)
+	} else if _, ok := secretIntf.(*secretsmanagerv2.PublicCertificate); ok {
+		secret := secretIntf.(*secretsmanagerv2.PublicCertificate)
 		if err = d.Set("type", secret.Type); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting type: %s", err))
 		}
@@ -383,8 +383,8 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		if err = d.Set("bundle_certs", secret.BundleCerts); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting bundle_certs: %s", err))
 		}
-	} else if _, ok := secretIntf.(*secretsmanagerv1.Secret); ok {
-		secret := secretIntf.(*secretsmanagerv1.Secret)
+	} else if _, ok := secretIntf.(*secretsmanagerv2.Secret); ok {
+		secret := secretIntf.(*secretsmanagerv2.Secret)
 		// TODO: handle argument of type SecretPrototype
 		if err = d.Set("type", secret.Type); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting type: %s", err))
@@ -458,19 +458,19 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 			return diag.FromErr(fmt.Errorf("Error setting bundle_certs: %s", err))
 		}
 	} else {
-		return diag.FromErr(fmt.Errorf("Unrecognized secretsmanagerv1.SecretIntf subtype encountered"))
+		return diag.FromErr(fmt.Errorf("Unrecognized secretsmanagerv2.SecretIntf subtype encountered"))
 	}
 
 	return nil
 }
 
 func resourceIbmSmSecretDelete(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
+	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	deleteSecretOptions := &secretsmanagerv1.DeleteSecretOptions{}
+	deleteSecretOptions := &secretsmanagerv2.DeleteSecretOptions{}
 
 	deleteSecretOptions.SetID(d.Id())
 
@@ -485,7 +485,7 @@ func resourceIbmSmSecretDelete(context context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceIbmSmSecretMapToSecretPrototype(modelMap map[string]interface{}) (secretsmanagerv1.SecretPrototypeIntf, error) {
+func resourceIbmSmSecretMapToSecretPrototype(modelMap map[string]interface{}) (secretsmanagerv2.SecretPrototypeIntf, error) {
 	discValue, ok := modelMap["type"]
 	if ok {
 		if discValue == "imported_cert" {
@@ -500,8 +500,8 @@ func resourceIbmSmSecretMapToSecretPrototype(modelMap map[string]interface{}) (s
 	}
 }
 
-func resourceIbmSmSecretMapToPublicCertificatePrototype(modelMap map[string]interface{}) (*secretsmanagerv1.PublicCertificatePrototype, error) {
-	model := &secretsmanagerv1.PublicCertificatePrototype{}
+func resourceIbmSmSecretMapToPublicCertificatePrototype(modelMap map[string]interface{}) (*secretsmanagerv2.PublicCertificatePrototype, error) {
+	model := &secretsmanagerv2.PublicCertificatePrototype{}
 	model.Type = core.StringPtr(modelMap["type"].(string))
 	model.Name = core.StringPtr(modelMap["name"].(string))
 	if modelMap["description"] != nil && modelMap["description"].(string) != "" {
@@ -521,8 +521,8 @@ func resourceIbmSmSecretMapToPublicCertificatePrototype(modelMap map[string]inte
 	return model, nil
 }
 
-func resourceIbmSmSecretMapToImportedCertificatePrototype(modelMap map[string]interface{}) (*secretsmanagerv1.ImportedCertificatePrototype, error) {
-	model := &secretsmanagerv1.ImportedCertificatePrototype{}
+func resourceIbmSmSecretMapToImportedCertificatePrototype(modelMap map[string]interface{}) (*secretsmanagerv2.ImportedCertificatePrototype, error) {
+	model := &secretsmanagerv2.ImportedCertificatePrototype{}
 	model.Type = core.StringPtr(modelMap["type"].(string))
 	model.Name = core.StringPtr(modelMap["name"].(string))
 	if modelMap["description"] != nil && modelMap["description"].(string) != "" {
@@ -548,14 +548,14 @@ func resourceIbmSmSecretMapToImportedCertificatePrototype(modelMap map[string]in
 	return model, nil
 }
 
-func resourceIbmSmSecretSecretPrototypeToMap(model secretsmanagerv1.SecretPrototypeIntf) (map[string]interface{}, error) {
-	if _, ok := model.(*secretsmanagerv1.ImportedCertificatePrototype); ok {
-		return resourceIbmSmSecretImportedCertificatePrototypeToMap(model.(*secretsmanagerv1.ImportedCertificatePrototype))
-	} else if _, ok := model.(*secretsmanagerv1.PublicCertificatePrototype); ok {
-		return resourceIbmSmSecretPublicCertificatePrototypeToMap(model.(*secretsmanagerv1.PublicCertificatePrototype))
-	} else if _, ok := model.(*secretsmanagerv1.SecretPrototype); ok {
+func resourceIbmSmSecretSecretPrototypeToMap(model secretsmanagerv2.SecretPrototypeIntf) (map[string]interface{}, error) {
+	if _, ok := model.(*secretsmanagerv2.ImportedCertificatePrototype); ok {
+		return resourceIbmSmSecretImportedCertificatePrototypeToMap(model.(*secretsmanagerv2.ImportedCertificatePrototype))
+	} else if _, ok := model.(*secretsmanagerv2.PublicCertificatePrototype); ok {
+		return resourceIbmSmSecretPublicCertificatePrototypeToMap(model.(*secretsmanagerv2.PublicCertificatePrototype))
+	} else if _, ok := model.(*secretsmanagerv2.SecretPrototype); ok {
 		modelMap := make(map[string]interface{})
-		model := model.(*secretsmanagerv1.SecretPrototype)
+		model := model.(*secretsmanagerv2.SecretPrototype)
 		if model.Type != nil {
 			modelMap["type"] = model.Type
 		}
@@ -585,11 +585,11 @@ func resourceIbmSmSecretSecretPrototypeToMap(model secretsmanagerv1.SecretProtot
 		}
 		return modelMap, nil
 	} else {
-		return nil, fmt.Errorf("Unrecognized secretsmanagerv1.SecretPrototypeIntf subtype encountered")
+		return nil, fmt.Errorf("Unrecognized secretsmanagerv2.SecretPrototypeIntf subtype encountered")
 	}
 }
 
-func resourceIbmSmSecretPublicCertificatePrototypeToMap(model *secretsmanagerv1.PublicCertificatePrototype) (map[string]interface{}, error) {
+func resourceIbmSmSecretPublicCertificatePrototypeToMap(model *secretsmanagerv2.PublicCertificatePrototype) (map[string]interface{}, error) {
 	modelMap := make(map[string]interface{})
 	modelMap["type"] = model.Type
 	modelMap["name"] = model.Name
@@ -606,7 +606,7 @@ func resourceIbmSmSecretPublicCertificatePrototypeToMap(model *secretsmanagerv1.
 	return modelMap, nil
 }
 
-func resourceIbmSmSecretImportedCertificatePrototypeToMap(model *secretsmanagerv1.ImportedCertificatePrototype) (map[string]interface{}, error) {
+func resourceIbmSmSecretImportedCertificatePrototypeToMap(model *secretsmanagerv2.ImportedCertificatePrototype) (map[string]interface{}, error) {
 	modelMap := make(map[string]interface{})
 	modelMap["type"] = model.Type
 	modelMap["name"] = model.Name
@@ -629,7 +629,7 @@ func resourceIbmSmSecretImportedCertificatePrototypeToMap(model *secretsmanagerv
 	return modelMap, nil
 }
 
-func resourceIbmSmSecretCertificateValidityToMap(model *secretsmanagerv1.CertificateValidity) (map[string]interface{}, error) {
+func resourceIbmSmSecretCertificateValidityToMap(model *secretsmanagerv2.CertificateValidity) (map[string]interface{}, error) {
 	modelMap := make(map[string]interface{})
 	modelMap["not_before"] = model.NotBefore.String()
 	modelMap["not_after"] = model.NotAfter.String()

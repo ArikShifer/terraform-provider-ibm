@@ -42,9 +42,9 @@ Nested scheme for **secret_prototype**:
 	* `intermediate` - (Optional, String) (Optional) The PEM encoded intermediate certificate to associate with the root certificate.
 	  * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/(.*?)/`.
 	* `labels` - (Optional, List) Labels that you can use to filter for secrets in your instance.Up to 30 labels can be created.
-	  * Constraints: The list items must match regular expression `/^[A-Za-z][A-Za-z0-9]*(?:_?-?.?[A-Za-z0-9]+)*$/`. The maximum length is `30` items. The minimum length is `0` items.
+	  * Constraints: The list items must match regular expression `/^[A-Za-z0-9][A-Za-z0-9]*(?:_?-?\\.?[A-Za-z0-9]+)*$/`. The maximum length is `30` items. The minimum length is `0` items.
 	* `name` - (Optional, String) A human-readable name to assign to your secret.To protect your privacy, do not use personal data, such as your name or location, as an name for your secret.
-	  * Constraints: The maximum length is `256` characters. The minimum length is `2` characters. The value must match regular expression `/^[A-Za-z][A-Za-z0-9]*(?:_?-?.?[A-Za-z0-9]+)*$/`.
+	  * Constraints: The maximum length is `256` characters. The minimum length is `2` characters. The value must match regular expression `/^[A-Za-z0-9][A-Za-z0-9]*(?:_?-?\\.?[A-Za-z0-9]+)*$/`.
 	* `private_key` - (Optional, String) (Optional) The PEM encoded private key to associate with the certificate.
 	  * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/(.*?)/`.
 	* `secret_group_id` - (Optional, String) A v4 UUID identifier.
@@ -77,10 +77,10 @@ In addition to all argument references listed, you can access the following attr
 * `key_algorithm` - (String) The identifier for the cryptographic algorithm that was used to generate the public and private keys that are associated with the certificate.
   * Constraints: The maximum length is `64` characters. The minimum length is `4` characters.
 * `labels` - (List) Labels that you can use to filter for secrets in your instance.Up to 30 labels can be created.
-  * Constraints: The list items must match regular expression `/^[A-Za-z][A-Za-z0-9]*(?:_?-?.?[A-Za-z0-9]+)*$/`. The maximum length is `30` items. The minimum length is `0` items.
+  * Constraints: The list items must match regular expression `/^[A-Za-z0-9][A-Za-z0-9]*(?:_?-?\\.?[A-Za-z0-9]+)*$/`. The maximum length is `30` items. The minimum length is `0` items.
 * `last_update_date` - (String) The date a resource was recently modified. The date format follows RFC 3339.
 * `name` - (String) A human-readable name to assign to your secret.To protect your privacy, do not use personal data, such as your name or location, as an name for your secret.
-  * Constraints: The maximum length is `256` characters. The minimum length is `2` characters. The value must match regular expression `/^[A-Za-z][A-Za-z0-9]*(?:_?-?.?[A-Za-z0-9]+)*$/`.
+  * Constraints: The maximum length is `256` characters. The minimum length is `2` characters. The value must match regular expression `/^[A-Za-z0-9][A-Za-z0-9]*(?:_?-?\\.?[A-Za-z0-9]+)*$/`.
 * `private_key` - (String) (Optional) The PEM encoded private key to associate with the certificate.
   * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/(.*?)/`.
 * `private_key_included` - (Boolean) Indicates whether the certificate was imported with an associated private key.

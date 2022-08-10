@@ -10,13 +10,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/IBM-Cloud/secrets-manager-mt-go-sdk/secretsmanagerv1"
+	"github.com/IBM-Cloud/secrets-manager-mt-go-sdk/secretsmanagerv2"
 	acc "github.com/IBM-Cloud/terraform-provider-ibm/ibm/acctest"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
 )
 
 func TestAccIbmSmSecretBasic(t *testing.T) {
-	var conf secretsmanagerv1.Secret
+	var conf secretsmanagerv2.Secret
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acc.TestAccPreCheck(t) },
@@ -56,7 +56,7 @@ func testAccCheckIbmSmSecretConfigBasic() string {
 	`)
 }
 
-func testAccCheckIbmSmSecretExists(n string, obj secretsmanagerv1.Secret) resource.TestCheckFunc {
+func testAccCheckIbmSmSecretExists(n string, obj secretsmanagerv2.Secret) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -64,12 +64,12 @@ func testAccCheckIbmSmSecretExists(n string, obj secretsmanagerv1.Secret) resour
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		secretsManagerClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).SecretsManagerV1()
+		secretsManagerClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).SecretsManagerV2()
 		if err != nil {
 			return err
 		}
 
-		getSecretOptions := &secretsmanagerv1.GetSecretOptions{}
+		getSecretOptions := &secretsmanagerv2.GetSecretOptions{}
 
 		getSecretOptions.SetID(rs.Primary.ID)
 
@@ -78,14 +78,14 @@ func testAccCheckIbmSmSecretExists(n string, obj secretsmanagerv1.Secret) resour
 			return err
 		}
 
-		secret := secretIntf.(*secretsmanagerv1.Secret)
+		secret := secretIntf.(*secretsmanagerv2.Secret)
 		obj = *secret
 		return nil
 	}
 }
 
 func testAccCheckIbmSmSecretDestroy(s *terraform.State) error {
-	secretsManagerClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).SecretsManagerV1()
+	secretsManagerClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).SecretsManagerV2()
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func testAccCheckIbmSmSecretDestroy(s *terraform.State) error {
 			continue
 		}
 
-		getSecretOptions := &secretsmanagerv1.GetSecretOptions{}
+		getSecretOptions := &secretsmanagerv2.GetSecretOptions{}
 
 		getSecretOptions.SetID(rs.Primary.ID)
 

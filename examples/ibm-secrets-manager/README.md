@@ -1,6 +1,6 @@
-# Example for SecretsManagerV1
+# Example for SecretsManagerV2
 
-This example illustrates how to use the SecretsManagerV1
+This example illustrates how to use the SecretsManagerV2
 
 These types of resources are supported:
 
@@ -20,7 +20,7 @@ $ terraform apply
 Run `terraform destroy` when you don't need these resources.
 
 
-## SecretsManagerV1 resources
+## SecretsManagerV2 resources
 
 sm_secret_group resource:
 
@@ -38,7 +38,7 @@ resource "sm_secret" "sm_secret_instance" {
 }
 ```
 
-## SecretsManagerV1 Data sources
+## SecretsManagerV2 Data sources
 
 
 ## Assumptions

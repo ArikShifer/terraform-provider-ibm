@@ -11,13 +11,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/IBM-Cloud/secrets-manager-mt-go-sdk/secretsmanagerv1"
+	"github.com/IBM-Cloud/secrets-manager-mt-go-sdk/secretsmanagerv2"
 	acc "github.com/IBM-Cloud/terraform-provider-ibm/ibm/acctest"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
 )
 
 func TestAccIbmSmSecretGroupBasic(t *testing.T) {
-	var conf secretsmanagerv1.SecretGroup
+	var conf secretsmanagerv2.SecretGroup
 	name := fmt.Sprintf("tf_name_%d", acctest.RandIntRange(10, 100))
 	nameUpdate := fmt.Sprintf("tf_name_%d", acctest.RandIntRange(10, 100))
 
@@ -44,7 +44,7 @@ func TestAccIbmSmSecretGroupBasic(t *testing.T) {
 }
 
 func TestAccIbmSmSecretGroupAllArgs(t *testing.T) {
-	var conf secretsmanagerv1.SecretGroup
+	var conf secretsmanagerv2.SecretGroup
 	name := fmt.Sprintf("tf_name_%d", acctest.RandIntRange(10, 100))
 	description := fmt.Sprintf("tf_description_%d", acctest.RandIntRange(10, 100))
 	nameUpdate := fmt.Sprintf("tf_name_%d", acctest.RandIntRange(10, 100))
@@ -98,7 +98,7 @@ func testAccCheckIbmSmSecretGroupConfig(name string, description string) string 
 	`, name, description)
 }
 
-func testAccCheckIbmSmSecretGroupExists(n string, obj secretsmanagerv1.SecretGroup) resource.TestCheckFunc {
+func testAccCheckIbmSmSecretGroupExists(n string, obj secretsmanagerv2.SecretGroup) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -106,12 +106,12 @@ func testAccCheckIbmSmSecretGroupExists(n string, obj secretsmanagerv1.SecretGro
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		secretsManagerClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).SecretsManagerV1()
+		secretsManagerClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).SecretsManagerV2()
 		if err != nil {
 			return err
 		}
 
-		getSecretGroupOptions := &secretsmanagerv1.GetSecretGroupOptions{}
+		getSecretGroupOptions := &secretsmanagerv2.GetSecretGroupOptions{}
 
 		getSecretGroupOptions.SetID(rs.Primary.ID)
 
@@ -126,7 +126,7 @@ func testAccCheckIbmSmSecretGroupExists(n string, obj secretsmanagerv1.SecretGro
 }
 
 func testAccCheckIbmSmSecretGroupDestroy(s *terraform.State) error {
-	secretsManagerClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).SecretsManagerV1()
+	secretsManagerClient, err := acc.TestAccProvider.Meta().(conns.ClientSession).SecretsManagerV2()
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func testAccCheckIbmSmSecretGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		getSecretGroupOptions := &secretsmanagerv1.GetSecretGroupOptions{}
+		getSecretGroupOptions := &secretsmanagerv2.GetSecretGroupOptions{}
 
 		getSecretGroupOptions.SetID(rs.Primary.ID)
 
