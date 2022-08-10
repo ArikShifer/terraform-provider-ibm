@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/IBM-Cloud/secrets-manager-mt-go-sdk/secretsmanagerv1"
+	"github.com/IBM-Cloud/secrets-manager-mt-go-sdk/secretsmanagerv2"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/flex"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/validate"
@@ -80,12 +80,12 @@ func ResourceIbmSmSecretGroupValidator() *validate.ResourceValidator {
 }
 
 func resourceIbmSmSecretGroupCreate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
+	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	createSecretGroupOptions := &secretsmanagerv1.CreateSecretGroupOptions{}
+	createSecretGroupOptions := &secretsmanagerv2.CreateSecretGroupOptions{}
 
 	createSecretGroupOptions.SetName(d.Get("name").(string))
 	if _, ok := d.GetOk("description"); ok {
@@ -104,12 +104,12 @@ func resourceIbmSmSecretGroupCreate(context context.Context, d *schema.ResourceD
 }
 
 func resourceIbmSmSecretGroupRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
+	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	getSecretGroupOptions := &secretsmanagerv1.GetSecretGroupOptions{}
+	getSecretGroupOptions := &secretsmanagerv2.GetSecretGroupOptions{}
 
 	getSecretGroupOptions.SetID(d.Id())
 
@@ -140,12 +140,12 @@ func resourceIbmSmSecretGroupRead(context context.Context, d *schema.ResourceDat
 }
 
 func resourceIbmSmSecretGroupUpdate(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
+	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	updateSecretGroupOptions := &secretsmanagerv1.UpdateSecretGroupOptions{}
+	updateSecretGroupOptions := &secretsmanagerv2.UpdateSecretGroupOptions{}
 
 	updateSecretGroupOptions.SetID(d.Id())
 
@@ -172,12 +172,12 @@ func resourceIbmSmSecretGroupUpdate(context context.Context, d *schema.ResourceD
 }
 
 func resourceIbmSmSecretGroupDelete(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV1()
+	secretsManagerClient, err := meta.(conns.ClientSession).SecretsManagerV2()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	deleteSecretGroupOptions := &secretsmanagerv1.DeleteSecretGroupOptions{}
+	deleteSecretGroupOptions := &secretsmanagerv2.DeleteSecretGroupOptions{}
 
 	deleteSecretGroupOptions.SetID(d.Id())
 
