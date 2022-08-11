@@ -215,6 +215,8 @@ func Provider() *schema.Provider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
+			"ibm_sm_secret_groups":   secretsmanager.DataSourceIbmSmSecretGroups(),
+			"ibm_sm_secrets":         secretsmanager.DataSourceIbmSmSecrets(),
 			"ibm_api_gateway":        apigateway.DataSourceIBMApiGateway(),
 			"ibm_account":            cloudfoundry.DataSourceIBMAccount(),
 			"ibm_app":                cloudfoundry.DataSourceIBMApp(),
