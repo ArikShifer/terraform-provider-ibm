@@ -76,6 +76,11 @@ func DataSourceIbmSmSecrets() *schema.Resource {
 							Computed:    true,
 							Description: "The date a resource was recently modified. The date format follows RFC 3339.",
 						},
+						"version_id": &schema.Schema{
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "A v4 UUID identifier.",
+						},
 						"versions_total": &schema.Schema{
 							Type:        schema.TypeInt,
 							Computed:    true,
@@ -131,6 +136,30 @@ func DataSourceIbmSmSecrets() *schema.Resource {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "Date time format follows RFC 3339.",
+									},
+								},
+							},
+						},
+						"bundle_certs": &schema.Schema{
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Determines whether your issued certificate is bundled with intermediate certificates. Set to `false` for the certificate file to contain only the issued certificate.",
+						},
+						"rotation": &schema.Schema{
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Determines whether Secrets Manager rotates your secrets automatically.For public certificates, if `auto_rotate` is set to `true` the service reorders your certificate 31 daysbefore it expires.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"auto_rotate": &schema.Schema{
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Determines whether Secrets Manager rotates your public certificate automatically.Default is `false`. If `auto_rotate` is set to `true` the service reorders your certificate 31 days. If rotation fails the service will attempt to reorder your certificate on the next day, every day before expiration.",
+									},
+									"rotate_keys": &schema.Schema{
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Determines whether Secrets Manager rotates the private key for your public certificate automatically.Default is `false`. If set to `true`, the service generates and stores a new private key for your rotated certificate.",
 									},
 								},
 							},
@@ -224,6 +253,9 @@ func dataSourceIbmSmSecretsSecretMetadataToMap(model secretsmanagerv2.SecretMeta
 		if model.LastUpdateDate != nil {
 			modelMap["last_update_date"] = model.LastUpdateDate.String()
 		}
+		if model.VersionID != nil {
+			modelMap["version_id"] = *model.VersionID
+		}
 		if model.VersionsTotal != nil {
 			modelMap["versions_total"] = *model.VersionsTotal
 		}
@@ -255,6 +287,16 @@ func dataSourceIbmSmSecretsSecretMetadataToMap(model secretsmanagerv2.SecretMeta
 			}
 			modelMap["validity"] = []map[string]interface{}{validityMap}
 		}
+		if model.BundleCerts != nil {
+			modelMap["bundle_certs"] = *model.BundleCerts
+		}
+		if model.Rotation != nil {
+			rotationMap, err := dataSourceIbmSmSecretsPublicCertificateRotationPolicyToMap(model.Rotation)
+			if err != nil {
+				return modelMap, err
+			}
+			modelMap["rotation"] = []map[string]interface{}{rotationMap}
+		}
 		return modelMap, nil
 	} else {
 		return nil, fmt.Errorf("Unrecognized secretsmanagerv2.SecretMetadataIntf subtype encountered")
@@ -268,6 +310,17 @@ func dataSourceIbmSmSecretsCertificateValidityToMap(model *secretsmanagerv2.Cert
 	}
 	if model.NotAfter != nil {
 		modelMap["not_after"] = model.NotAfter.String()
+	}
+	return modelMap, nil
+}
+
+func dataSourceIbmSmSecretsPublicCertificateRotationPolicyToMap(model *secretsmanagerv2.PublicCertificateRotationPolicy) (map[string]interface{}, error) {
+	modelMap := make(map[string]interface{})
+	if model.AutoRotate != nil {
+		modelMap["auto_rotate"] = *model.AutoRotate
+	}
+	if model.RotateKeys != nil {
+		modelMap["rotate_keys"] = *model.RotateKeys
 	}
 	return modelMap, nil
 }
@@ -301,6 +354,9 @@ func dataSourceIbmSmSecretsPublicCertificateMetadataToMap(model *secretsmanagerv
 	if model.LastUpdateDate != nil {
 		modelMap["last_update_date"] = model.LastUpdateDate.String()
 	}
+	if model.VersionID != nil {
+		modelMap["version_id"] = *model.VersionID
+	}
 	if model.VersionsTotal != nil {
 		modelMap["versions_total"] = *model.VersionsTotal
 	}
@@ -325,6 +381,16 @@ func dataSourceIbmSmSecretsPublicCertificateMetadataToMap(model *secretsmanagerv
 			return modelMap, err
 		}
 		modelMap["validity"] = []map[string]interface{}{validityMap}
+	}
+	if model.BundleCerts != nil {
+		modelMap["bundle_certs"] = *model.BundleCerts
+	}
+	if model.Rotation != nil {
+		rotationMap, err := dataSourceIbmSmSecretsPublicCertificateRotationPolicyToMap(model.Rotation)
+		if err != nil {
+			return modelMap, err
+		}
+		modelMap["rotation"] = []map[string]interface{}{rotationMap}
 	}
 	return modelMap, nil
 }
@@ -357,6 +423,9 @@ func dataSourceIbmSmSecretsImportedCertificateMetadataToMap(model *secretsmanage
 	}
 	if model.LastUpdateDate != nil {
 		modelMap["last_update_date"] = model.LastUpdateDate.String()
+	}
+	if model.VersionID != nil {
+		modelMap["version_id"] = *model.VersionID
 	}
 	if model.VersionsTotal != nil {
 		modelMap["versions_total"] = *model.VersionsTotal

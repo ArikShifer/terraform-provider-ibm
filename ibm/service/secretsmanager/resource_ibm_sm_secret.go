@@ -82,6 +82,27 @@ func ResourceIbmSmSecret() *schema.Resource {
 							Default:     true,
 							Description: "Determines whether your issued certificate is bundled with intermediate certificates. Set to `false` for the certificate file to contain only the issued certificate.",
 						},
+						"rotation": &schema.Schema{
+							Type:        schema.TypeList,
+							MaxItems:    1,
+							Optional:    true,
+							Description: "Determines whether Secrets Manager rotates your secrets automatically.For public certificates, if `auto_rotate` is set to `true` the service reorders your certificate 31 daysbefore it expires.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"auto_rotate": &schema.Schema{
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: "Determines whether Secrets Manager rotates your public certificate automatically.Default is `false`. If `auto_rotate` is set to `true` the service reorders your certificate 31 days. If rotation fails the service will attempt to reorder your certificate on the next day, every day before expiration.",
+									},
+									"rotate_keys": &schema.Schema{
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Description: "Determines whether Secrets Manager rotates the private key for your public certificate automatically.Default is `false`. If set to `true`, the service generates and stores a new private key for your rotated certificate.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -125,6 +146,11 @@ func ResourceIbmSmSecret() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The date a resource was recently modified. The date format follows RFC 3339.",
+			},
+			"version_id": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "A v4 UUID identifier.",
 			},
 			"versions_total": &schema.Schema{
 				Type:        schema.TypeInt,
@@ -205,6 +231,26 @@ func ResourceIbmSmSecret() *schema.Resource {
 				Computed:    true,
 				Description: "Determines whether your issued certificate is bundled with intermediate certificates. Set to `false` for the certificate file to contain only the issued certificate.",
 			},
+			"rotation": &schema.Schema{
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Determines whether Secrets Manager rotates your secrets automatically.For public certificates, if `auto_rotate` is set to `true` the service reorders your certificate 31 daysbefore it expires.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"auto_rotate": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Determines whether Secrets Manager rotates your public certificate automatically.Default is `false`. If `auto_rotate` is set to `true` the service reorders your certificate 31 days. If rotation fails the service will attempt to reorder your certificate on the next day, every day before expiration.",
+						},
+						"rotate_keys": &schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Determines whether Secrets Manager rotates the private key for your public certificate automatically.Default is `false`. If set to `true`, the service generates and stores a new private key for your rotated certificate.",
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -283,6 +329,9 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		if err = d.Set("last_update_date", flex.DateTimeToString(secret.LastUpdateDate)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting last_update_date: %s", err))
 		}
+		if err = d.Set("version_id", secret.VersionID); err != nil {
+			return diag.FromErr(fmt.Errorf("Error setting version_id: %s", err))
+		}
 		if err = d.Set("versions_total", flex.IntValue(secret.VersionsTotal)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting versions_total: %s", err))
 		}
@@ -353,6 +402,9 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		if err = d.Set("last_update_date", flex.DateTimeToString(secret.LastUpdateDate)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting last_update_date: %s", err))
 		}
+		if err = d.Set("version_id", secret.VersionID); err != nil {
+			return diag.FromErr(fmt.Errorf("Error setting version_id: %s", err))
+		}
 		if err = d.Set("versions_total", flex.IntValue(secret.VersionsTotal)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting versions_total: %s", err))
 		}
@@ -383,6 +435,15 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		if err = d.Set("bundle_certs", secret.BundleCerts); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting bundle_certs: %s", err))
 		}
+		if secret.Rotation != nil {
+			rotationMap, err := resourceIbmSmSecretPublicCertificateRotationPolicyToMap(secret.Rotation)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			if err = d.Set("rotation", []map[string]interface{}{rotationMap}); err != nil {
+				return diag.FromErr(fmt.Errorf("Error setting rotation: %s", err))
+			}
+		}
 	} else if _, ok := secretIntf.(*secretsmanagerv2.Secret); ok {
 		secret := secretIntf.(*secretsmanagerv2.Secret)
 		// TODO: handle argument of type SecretPrototype
@@ -411,6 +472,9 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		}
 		if err = d.Set("last_update_date", flex.DateTimeToString(secret.LastUpdateDate)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting last_update_date: %s", err))
+		}
+		if err = d.Set("version_id", secret.VersionID); err != nil {
+			return diag.FromErr(fmt.Errorf("Error setting version_id: %s", err))
 		}
 		if err = d.Set("versions_total", flex.IntValue(secret.VersionsTotal)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting versions_total: %s", err))
@@ -457,6 +521,15 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		if err = d.Set("bundle_certs", secret.BundleCerts); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting bundle_certs: %s", err))
 		}
+		if secret.Rotation != nil {
+			rotationMap, err := resourceIbmSmSecretPublicCertificateRotationPolicyToMap(secret.Rotation)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			if err = d.Set("rotation", []map[string]interface{}{rotationMap}); err != nil {
+				return diag.FromErr(fmt.Errorf("Error setting rotation: %s", err))
+			}
+		}
 	} else {
 		return diag.FromErr(fmt.Errorf("Unrecognized secretsmanagerv2.SecretIntf subtype encountered"))
 	}
@@ -500,6 +573,17 @@ func resourceIbmSmSecretMapToSecretPrototype(modelMap map[string]interface{}) (s
 	}
 }
 
+func resourceIbmSmSecretMapToPublicCertificateRotationPolicy(modelMap map[string]interface{}) (*secretsmanagerv2.PublicCertificateRotationPolicy, error) {
+	model := &secretsmanagerv2.PublicCertificateRotationPolicy{}
+	if modelMap["auto_rotate"] != nil {
+		model.AutoRotate = core.BoolPtr(modelMap["auto_rotate"].(bool))
+	}
+	if modelMap["rotate_keys"] != nil {
+		model.RotateKeys = core.BoolPtr(modelMap["rotate_keys"].(bool))
+	}
+	return model, nil
+}
+
 func resourceIbmSmSecretMapToPublicCertificatePrototype(modelMap map[string]interface{}) (*secretsmanagerv2.PublicCertificatePrototype, error) {
 	model := &secretsmanagerv2.PublicCertificatePrototype{}
 	model.Type = core.StringPtr(modelMap["type"].(string))
@@ -517,7 +601,16 @@ func resourceIbmSmSecretMapToPublicCertificatePrototype(modelMap map[string]inte
 		}
 		model.Labels = labels
 	}
-	model.BundleCerts = core.BoolPtr(modelMap["bundle_certs"].(bool))
+	if modelMap["bundle_certs"] != nil {
+		model.BundleCerts = core.BoolPtr(modelMap["bundle_certs"].(bool))
+	}
+	if modelMap["rotation"] != nil && len(modelMap["rotation"].([]interface{})) > 0 {
+		RotationModel, err := resourceIbmSmSecretMapToPublicCertificateRotationPolicy(modelMap["rotation"].([]interface{})[0].(map[string]interface{}))
+		if err != nil {
+			return model, err
+		}
+		model.Rotation = RotationModel
+	}
 	return model, nil
 }
 
@@ -583,10 +676,28 @@ func resourceIbmSmSecretSecretPrototypeToMap(model secretsmanagerv2.SecretProtot
 		if model.BundleCerts != nil {
 			modelMap["bundle_certs"] = model.BundleCerts
 		}
+		if model.Rotation != nil {
+			rotationMap, err := resourceIbmSmSecretPublicCertificateRotationPolicyToMap(model.Rotation)
+			if err != nil {
+				return modelMap, err
+			}
+			modelMap["rotation"] = []map[string]interface{}{rotationMap}
+		}
 		return modelMap, nil
 	} else {
 		return nil, fmt.Errorf("Unrecognized secretsmanagerv2.SecretPrototypeIntf subtype encountered")
 	}
+}
+
+func resourceIbmSmSecretPublicCertificateRotationPolicyToMap(model *secretsmanagerv2.PublicCertificateRotationPolicy) (map[string]interface{}, error) {
+	modelMap := make(map[string]interface{})
+	if model.AutoRotate != nil {
+		modelMap["auto_rotate"] = model.AutoRotate
+	}
+	if model.RotateKeys != nil {
+		modelMap["rotate_keys"] = model.RotateKeys
+	}
+	return modelMap, nil
 }
 
 func resourceIbmSmSecretPublicCertificatePrototypeToMap(model *secretsmanagerv2.PublicCertificatePrototype) (map[string]interface{}, error) {
@@ -602,7 +713,16 @@ func resourceIbmSmSecretPublicCertificatePrototypeToMap(model *secretsmanagerv2.
 	if model.Labels != nil {
 		modelMap["labels"] = model.Labels
 	}
-	modelMap["bundle_certs"] = model.BundleCerts
+	if model.BundleCerts != nil {
+		modelMap["bundle_certs"] = model.BundleCerts
+	}
+	if model.Rotation != nil {
+		rotationMap, err := resourceIbmSmSecretPublicCertificateRotationPolicyToMap(model.Rotation)
+		if err != nil {
+			return modelMap, err
+		}
+		modelMap["rotation"] = []map[string]interface{}{rotationMap}
+	}
 	return modelMap, nil
 }
 

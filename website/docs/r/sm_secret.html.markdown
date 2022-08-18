@@ -47,6 +47,11 @@ Nested scheme for **secret_prototype**:
 	  * Constraints: The maximum length is `256` characters. The minimum length is `2` characters. The value must match regular expression `/^[A-Za-z0-9][A-Za-z0-9]*(?:_?-?\\.?[A-Za-z0-9]+)*$/`.
 	* `private_key` - (Optional, String) (Optional) The PEM encoded private key to associate with the certificate.
 	  * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/(.*?)/`.
+	* `rotation` - (Optional, List) Determines whether Secrets Manager rotates your secrets automatically.For public certificates, if `auto_rotate` is set to `true` the service reorders your certificate 31 daysbefore it expires.
+	Nested scheme for **rotation**:
+		* `auto_rotate` - (Optional, Boolean) Determines whether Secrets Manager rotates your public certificate automatically.Default is `false`. If `auto_rotate` is set to `true` the service reorders your certificate 31 days. If rotation fails the service will attempt to reorder your certificate on the next day, every day before expiration.
+		* `rotate_keys` - (Optional, Boolean) Determines whether Secrets Manager rotates the private key for your public certificate automatically.Default is `false`. If set to `true`, the service generates and stores a new private key for your rotated certificate.
+		  * Constraints: The default value is `false`.
 	* `secret_group_id` - (Optional, String) A v4 UUID identifier.
 	  * Constraints: The maximum length is `36` characters. The minimum length is `36` characters. The value must match regular expression `/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/`.
 	* `type` - (Optional, String) Secret type. Supported types are Imported Certificate, Public Certificate.
@@ -84,6 +89,11 @@ In addition to all argument references listed, you can access the following attr
 * `private_key` - (String) (Optional) The PEM encoded private key to associate with the certificate.
   * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/(.*?)/`.
 * `private_key_included` - (Boolean) Indicates whether the certificate was imported with an associated private key.
+* `rotation` - (List) Determines whether Secrets Manager rotates your secrets automatically.For public certificates, if `auto_rotate` is set to `true` the service reorders your certificate 31 daysbefore it expires.
+Nested scheme for **rotation**:
+	* `auto_rotate` - (Boolean) Determines whether Secrets Manager rotates your public certificate automatically.Default is `false`. If `auto_rotate` is set to `true` the service reorders your certificate 31 days. If rotation fails the service will attempt to reorder your certificate on the next day, every day before expiration.
+	* `rotate_keys` - (Boolean) Determines whether Secrets Manager rotates the private key for your public certificate automatically.Default is `false`. If set to `true`, the service generates and stores a new private key for your rotated certificate.
+	  * Constraints: The default value is `false`.
 * `secret_group_id` - (String) A v4 UUID identifier.
   * Constraints: The maximum length is `36` characters. The minimum length is `36` characters. The value must match regular expression `/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/`.
 * `serial_number` - (String) The unique serial number that was assigned to a certificate by the issuing certificate authority.
@@ -94,6 +104,8 @@ In addition to all argument references listed, you can access the following attr
 Nested scheme for **validity**:
 	* `not_after` - (String) Date time format follows RFC 3339.
 	* `not_before` - (String) Date time format follows RFC 3339.
+* `version_id` - (String) A v4 UUID identifier.
+  * Constraints: The maximum length is `36` characters. The minimum length is `36` characters. The value must match regular expression `/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/`.
 * `versions_total` - (Integer) The number of versions the secret has.
   * Constraints: The maximum value is `50`. The minimum value is `0`.
 
