@@ -16,3 +16,5 @@ variable "sm_secret_group_description" {
 }
 
 // Resource arguments for sm_secret
+
+

@@ -92,6 +92,7 @@ func ResourceIbmSmSecret() *schema.Resource {
 									"auto_rotate": &schema.Schema{
 										Type:        schema.TypeBool,
 										Optional:    true,
+										Default:     false,
 										Description: "Determines whether Secrets Manager rotates your public certificate automatically.Default is `false`. If `auto_rotate` is set to `true` the service reorders your certificate 31 days. If rotation fails the service will attempt to reorder your certificate on the next day, every day before expiration.",
 									},
 									"rotate_keys": &schema.Schema{
@@ -240,6 +241,7 @@ func ResourceIbmSmSecret() *schema.Resource {
 						"auto_rotate": &schema.Schema{
 							Type:        schema.TypeBool,
 							Optional:    true,
+							Default:     false,
 							Description: "Determines whether Secrets Manager rotates your public certificate automatically.Default is `false`. If `auto_rotate` is set to `true` the service reorders your certificate 31 days. If rotation fails the service will attempt to reorder your certificate on the next day, every day before expiration.",
 						},
 						"rotate_keys": &schema.Schema{
@@ -275,8 +277,18 @@ func resourceIbmSmSecretCreate(context context.Context, d *schema.ResourceData, 
 		return diag.FromErr(fmt.Errorf("CreateSecretWithContext failed %s\n%s", err, response))
 	}
 
-	secret := secretIntf.(*secretsmanagerv2.ImportedCertificate)
-	d.SetId(*secret.ID)
+	if _, ok := secretIntf.(*secretsmanagerv2.ImportedCertificate); ok {
+		secret := secretIntf.(*secretsmanagerv2.ImportedCertificate)
+		d.SetId(*secret.ID)
+	} else if _, ok := secretIntf.(*secretsmanagerv2.PublicCertificate); ok {
+		secret := secretIntf.(*secretsmanagerv2.PublicCertificate)
+		d.SetId(*secret.ID)
+	} else if _, ok := secretIntf.(*secretsmanagerv2.Secret); ok {
+		secret := secretIntf.(*secretsmanagerv2.Secret)
+		d.SetId(*secret.ID)
+	} else {
+		return diag.FromErr(fmt.Errorf("Unrecognized secretsmanagerv2.SecretIntf subtype encountered"))
+	}
 
 	return resourceIbmSmSecretRead(context, d, meta)
 }
@@ -431,6 +443,15 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 			if err = d.Set("validity", []map[string]interface{}{validityMap}); err != nil {
 				return diag.FromErr(fmt.Errorf("Error setting validity: %s", err))
 			}
+		}
+		if err = d.Set("certificate", secret.Certificate); err != nil {
+			return diag.FromErr(fmt.Errorf("Error setting certificate: %s", err))
+		}
+		if err = d.Set("intermediate", secret.Intermediate); err != nil {
+			return diag.FromErr(fmt.Errorf("Error setting intermediate: %s", err))
+		}
+		if err = d.Set("private_key", secret.PrivateKey); err != nil {
+			return diag.FromErr(fmt.Errorf("Error setting private_key: %s", err))
 		}
 		if err = d.Set("bundle_certs", secret.BundleCerts); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting bundle_certs: %s", err))

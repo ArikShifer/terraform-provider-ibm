@@ -40,6 +40,18 @@ resource "sm_secret" "sm_secret_instance" {
 
 ## SecretsManagerV2 Data sources
 
+sm_secret_groups data source:
+
+```hcl
+data "sm_secret_groups" "sm_secret_groups_instance" {
+}
+```
+sm_secrets data source:
+
+```hcl
+data "sm_secrets" "sm_secrets_instance" {
+}
+```
 
 ## Assumptions
 
@@ -76,3 +88,5 @@ resource "sm_secret" "sm_secret_instance" {
 |------|-------------|
 | sm_secret_group | sm_secret_group object |
 | sm_secret | sm_secret object |
+| sm_secret_groups | sm_secret_groups object |
+| sm_secrets | sm_secrets object |

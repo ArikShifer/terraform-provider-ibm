@@ -28,6 +28,11 @@ func DataSourceIbmSmSecrets() *schema.Resource {
 				Description: "A collection of secrets metadata.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": &schema.Schema{
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "A v4 UUID identifier.",
+						},
 						"type": &schema.Schema{
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -55,11 +60,6 @@ func DataSourceIbmSmSecrets() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
-						},
-						"id": &schema.Schema{
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "A v4 UUID identifier.",
 						},
 						"created_by": &schema.Schema{
 							Type:        schema.TypeString,
@@ -226,6 +226,9 @@ func dataSourceIbmSmSecretsSecretMetadataToMap(model secretsmanagerv2.SecretMeta
 	} else if _, ok := model.(*secretsmanagerv2.SecretMetadata); ok {
 		modelMap := make(map[string]interface{})
 		model := model.(*secretsmanagerv2.SecretMetadata)
+		if model.ID != nil {
+			modelMap["id"] = *model.ID
+		}
 		if model.Type != nil {
 			modelMap["type"] = *model.Type
 		}
@@ -240,9 +243,6 @@ func dataSourceIbmSmSecretsSecretMetadataToMap(model secretsmanagerv2.SecretMeta
 		}
 		if model.Labels != nil {
 			modelMap["labels"] = model.Labels
-		}
-		if model.ID != nil {
-			modelMap["id"] = *model.ID
 		}
 		if model.CreatedBy != nil {
 			modelMap["created_by"] = *model.CreatedBy
@@ -327,6 +327,9 @@ func dataSourceIbmSmSecretsPublicCertificateRotationPolicyToMap(model *secretsma
 
 func dataSourceIbmSmSecretsPublicCertificateMetadataToMap(model *secretsmanagerv2.PublicCertificateMetadata) (map[string]interface{}, error) {
 	modelMap := make(map[string]interface{})
+	if model.ID != nil {
+		modelMap["id"] = *model.ID
+	}
 	if model.Type != nil {
 		modelMap["type"] = *model.Type
 	}
@@ -341,9 +344,6 @@ func dataSourceIbmSmSecretsPublicCertificateMetadataToMap(model *secretsmanagerv
 	}
 	if model.Labels != nil {
 		modelMap["labels"] = model.Labels
-	}
-	if model.ID != nil {
-		modelMap["id"] = *model.ID
 	}
 	if model.CreatedBy != nil {
 		modelMap["created_by"] = *model.CreatedBy
@@ -397,6 +397,9 @@ func dataSourceIbmSmSecretsPublicCertificateMetadataToMap(model *secretsmanagerv
 
 func dataSourceIbmSmSecretsImportedCertificateMetadataToMap(model *secretsmanagerv2.ImportedCertificateMetadata) (map[string]interface{}, error) {
 	modelMap := make(map[string]interface{})
+	if model.ID != nil {
+		modelMap["id"] = *model.ID
+	}
 	if model.Type != nil {
 		modelMap["type"] = *model.Type
 	}
@@ -411,9 +414,6 @@ func dataSourceIbmSmSecretsImportedCertificateMetadataToMap(model *secretsmanage
 	}
 	if model.Labels != nil {
 		modelMap["labels"] = model.Labels
-	}
-	if model.ID != nil {
-		modelMap["id"] = *model.ID
 	}
 	if model.CreatedBy != nil {
 		modelMap["created_by"] = *model.CreatedBy
