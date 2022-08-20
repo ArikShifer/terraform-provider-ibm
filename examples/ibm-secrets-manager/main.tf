@@ -21,3 +21,19 @@ resource "ibm_sm_secret" "sm_secret_instance" {
     private_key = "private_key"
   }
 }
+
+// Data source is not linked to a resource instance
+// Uncomment if an existing data source instance exists
+/*
+// Create sm_secret_groups data source
+data "ibm_sm_secret_groups" "sm_secret_groups_instance" {
+}
+*/
+
+// Data source is not linked to a resource instance
+// Uncomment if an existing data source instance exists
+/*
+// Create sm_secrets data source
+data "ibm_sm_secrets" "sm_secrets_instance" {
+}
+*/
