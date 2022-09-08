@@ -21,8 +21,10 @@ func TestAccIbmSmSecretsDataSourceBasic(t *testing.T) {
 				Config: testAccCheckIbmSmSecretsDataSourceConfigBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.ibm_sm_secrets.sm_secrets", "id"),
+					resource.TestCheckResourceAttrSet("data.ibm_sm_secrets.sm_secrets", "first.#"),
+					resource.TestCheckResourceAttrSet("data.ibm_sm_secrets.sm_secrets", "previous.#"),
+					resource.TestCheckResourceAttrSet("data.ibm_sm_secrets.sm_secrets", "last.#"),
 					resource.TestCheckResourceAttrSet("data.ibm_sm_secrets.sm_secrets", "secrets.#"),
-					resource.TestCheckResourceAttrSet("data.ibm_sm_secrets.sm_secrets", "total_count"),
 				),
 			},
 		},

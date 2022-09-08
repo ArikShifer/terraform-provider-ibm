@@ -67,16 +67,12 @@ In addition to all argument references listed, you can access the following attr
   * Constraints: The maximum length is `64` characters. The minimum length is `4` characters.
 * `bundle_certs` - (Boolean) Determines whether your issued certificate is bundled with intermediate certificates. Set to `false` for the certificate file to contain only the issued certificate.
   * Constraints: The default value is `true`.
-* `certificate` - (String) The PEM encoded contents of your certificate.
-  * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/((.| )*)/`.
 * `created_by` - (String) The unique identifier for the entity that created the secret.
   * Constraints: The maximum length is `128` characters. The minimum length is `4` characters.
 * `creation_date` - (String) The date a resource was created. The date format follows RFC 3339.
 * `description` - (String) An extended description of your secret.To protect your privacy, do not use personal data, such as your name or location, as a description for your secret group.
   * Constraints: The maximum length is `1024` characters. The minimum length is `0` characters. The value must match regular expression `/(.*?)/`.
 * `expiration_date` - (String) The date a secret is expired. The date format follows RFC 3339.
-* `intermediate` - (String) (Optional) The PEM encoded intermediate certificate to associate with the root certificate.
-  * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/((.| )*)/`.
 * `intermediate_included` - (Boolean) Indicates whether the certificate was imported with an associated intermediate certificate.
 * `issuer` - (String) The distinguished name that identifies the entity that signed and issued the certificate.
   * Constraints: The maximum length is `64` characters. The minimum length is `2` characters.
@@ -85,10 +81,10 @@ In addition to all argument references listed, you can access the following attr
 * `labels` - (List) Labels that you can use to filter for secrets in your instance.Up to 30 labels can be created.
   * Constraints: The list items must match regular expression `/^[A-Za-z0-9][A-Za-z0-9]*(?:_?-?\\.?[A-Za-z0-9]+)*$/`. The maximum length is `30` items. The minimum length is `0` items.
 * `last_update_date` - (String) The date a resource was recently modified. The date format follows RFC 3339.
+* `locks_total` - (Integer) The number of locks the secret has.
+  * Constraints: The maximum value is `1000`. The minimum value is `0`.
 * `name` - (String) A human-readable name to assign to your secret.To protect your privacy, do not use personal data, such as your name or location, as an name for your secret.
   * Constraints: The maximum length is `256` characters. The minimum length is `2` characters. The value must match regular expression `/^[A-Za-z0-9][A-Za-z0-9]*(?:_?-?\\.?[A-Za-z0-9]+)*$/`.
-* `private_key` - (String) (Optional) The PEM encoded private key to associate with the certificate.
-  * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/((.| )*)/`.
 * `private_key_included` - (Boolean) Indicates whether the certificate was imported with an associated private key.
 * `rotation` - (List) Determines whether Secrets Manager rotates your secrets automatically.For public certificates, if `auto_rotate` is set to `true` the service reorders your certificate 31 daysbefore it expires.
 Nested scheme for **rotation**:
@@ -96,6 +92,14 @@ Nested scheme for **rotation**:
 	  * Constraints: The default value is `false`.
 	* `rotate_keys` - (Boolean) Determines whether Secrets Manager rotates the private key for your public certificate automatically.Default is `false`. If set to `true`, the service generates and stores a new private key for your rotated certificate.
 	  * Constraints: The default value is `false`.
+* `secret_data` - (List) Your secret data.
+Nested scheme for **secret_data**:
+	* `certificate` - (String) The PEM encoded contents of your certificate.
+	  * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/((.| )*)/`.
+	* `intermediate` - (String) (Optional) The PEM encoded intermediate certificate to associate with the root certificate.
+	  * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/((.| )*)/`.
+	* `private_key` - (String) (Optional) The PEM encoded private key to associate with the certificate.
+	  * Constraints: The maximum length is `100000` characters. The minimum length is `50` characters. The value must match regular expression `/((.| )*)/`.
 * `secret_group_id` - (String) A v4 UUID identifier.
   * Constraints: The maximum length is `36` characters. The minimum length is `36` characters. The value must match regular expression `/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/`.
 * `serial_number` - (String) The unique serial number that was assigned to a certificate by the issuing certificate authority.
