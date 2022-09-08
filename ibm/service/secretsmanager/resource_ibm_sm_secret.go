@@ -158,6 +158,11 @@ func ResourceIbmSmSecret() *schema.Resource {
 				Computed:    true,
 				Description: "The number of versions the secret has.",
 			},
+			"locks_total": &schema.Schema{
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The number of locks the secret has.",
+			},
 			"expiration_date": &schema.Schema{
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -212,20 +217,29 @@ func ResourceIbmSmSecret() *schema.Resource {
 					},
 				},
 			},
-			"certificate": &schema.Schema{
-				Type:        schema.TypeString,
+			"secret_data": &schema.Schema{
+				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "The PEM encoded contents of your certificate.",
-			},
-			"intermediate": &schema.Schema{
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "(Optional) The PEM encoded intermediate certificate to associate with the root certificate.",
-			},
-			"private_key": &schema.Schema{
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "(Optional) The PEM encoded private key to associate with the certificate.",
+				Description: "Your secret data.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"certificate": &schema.Schema{
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The PEM encoded contents of your certificate.",
+						},
+						"intermediate": &schema.Schema{
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "(Optional) The PEM encoded intermediate certificate to associate with the root certificate.",
+						},
+						"private_key": &schema.Schema{
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "(Optional) The PEM encoded private key to associate with the certificate.",
+						},
+					},
+				},
 			},
 			"bundle_certs": &schema.Schema{
 				Type:        schema.TypeBool,
@@ -347,6 +361,9 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		if err = d.Set("versions_total", flex.IntValue(secret.VersionsTotal)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting versions_total: %s", err))
 		}
+		if err = d.Set("locks_total", flex.IntValue(secret.LocksTotal)); err != nil {
+			return diag.FromErr(fmt.Errorf("Error setting locks_total: %s", err))
+		}
 		if err = d.Set("expiration_date", flex.DateTimeToString(secret.ExpirationDate)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting expiration_date: %s", err))
 		}
@@ -377,14 +394,14 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 				return diag.FromErr(fmt.Errorf("Error setting validity: %s", err))
 			}
 		}
-		if err = d.Set("certificate", secret.Certificate); err != nil {
-			return diag.FromErr(fmt.Errorf("Error setting certificate: %s", err))
-		}
-		if err = d.Set("intermediate", secret.Intermediate); err != nil {
-			return diag.FromErr(fmt.Errorf("Error setting intermediate: %s", err))
-		}
-		if err = d.Set("private_key", secret.PrivateKey); err != nil {
-			return diag.FromErr(fmt.Errorf("Error setting private_key: %s", err))
+		if secret.SecretData != nil {
+			secretDataMap, err := resourceIbmSmSecretSecretDataToMap(secret.SecretData)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			if err = d.Set("secret_data", []map[string]interface{}{secretDataMap}); err != nil {
+				return diag.FromErr(fmt.Errorf("Error setting secret_data: %s", err))
+			}
 		}
 	} else if _, ok := secretIntf.(*secretsmanagerv2.PublicCertificate); ok {
 		secret := secretIntf.(*secretsmanagerv2.PublicCertificate)
@@ -420,6 +437,9 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		if err = d.Set("versions_total", flex.IntValue(secret.VersionsTotal)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting versions_total: %s", err))
 		}
+		if err = d.Set("locks_total", flex.IntValue(secret.LocksTotal)); err != nil {
+			return diag.FromErr(fmt.Errorf("Error setting locks_total: %s", err))
+		}
 		if err = d.Set("expiration_date", flex.DateTimeToString(secret.ExpirationDate)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting expiration_date: %s", err))
 		}
@@ -444,14 +464,14 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 				return diag.FromErr(fmt.Errorf("Error setting validity: %s", err))
 			}
 		}
-		if err = d.Set("certificate", secret.Certificate); err != nil {
-			return diag.FromErr(fmt.Errorf("Error setting certificate: %s", err))
-		}
-		if err = d.Set("intermediate", secret.Intermediate); err != nil {
-			return diag.FromErr(fmt.Errorf("Error setting intermediate: %s", err))
-		}
-		if err = d.Set("private_key", secret.PrivateKey); err != nil {
-			return diag.FromErr(fmt.Errorf("Error setting private_key: %s", err))
+		if secret.SecretData != nil {
+			secretDataMap, err := resourceIbmSmSecretSecretDataToMap(secret.SecretData)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			if err = d.Set("secret_data", []map[string]interface{}{secretDataMap}); err != nil {
+				return diag.FromErr(fmt.Errorf("Error setting secret_data: %s", err))
+			}
 		}
 		if err = d.Set("bundle_certs", secret.BundleCerts); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting bundle_certs: %s", err))
@@ -500,6 +520,9 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 		if err = d.Set("versions_total", flex.IntValue(secret.VersionsTotal)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting versions_total: %s", err))
 		}
+		if err = d.Set("locks_total", flex.IntValue(secret.LocksTotal)); err != nil {
+			return diag.FromErr(fmt.Errorf("Error setting locks_total: %s", err))
+		}
 		if err = d.Set("expiration_date", flex.DateTimeToString(secret.ExpirationDate)); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting expiration_date: %s", err))
 		}
@@ -530,14 +553,14 @@ func resourceIbmSmSecretRead(context context.Context, d *schema.ResourceData, me
 				return diag.FromErr(fmt.Errorf("Error setting validity: %s", err))
 			}
 		}
-		if err = d.Set("certificate", secret.Certificate); err != nil {
-			return diag.FromErr(fmt.Errorf("Error setting certificate: %s", err))
-		}
-		if err = d.Set("intermediate", secret.Intermediate); err != nil {
-			return diag.FromErr(fmt.Errorf("Error setting intermediate: %s", err))
-		}
-		if err = d.Set("private_key", secret.PrivateKey); err != nil {
-			return diag.FromErr(fmt.Errorf("Error setting private_key: %s", err))
+		if secret.SecretData != nil {
+			secretDataMap, err := resourceIbmSmSecretSecretDataToMap(secret.SecretData)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			if err = d.Set("secret_data", []map[string]interface{}{secretDataMap}); err != nil {
+				return diag.FromErr(fmt.Errorf("Error setting secret_data: %s", err))
+			}
 		}
 		if err = d.Set("bundle_certs", secret.BundleCerts); err != nil {
 			return diag.FromErr(fmt.Errorf("Error setting bundle_certs: %s", err))
@@ -774,5 +797,48 @@ func resourceIbmSmSecretCertificateValidityToMap(model *secretsmanagerv2.Certifi
 	modelMap := make(map[string]interface{})
 	modelMap["not_before"] = model.NotBefore.String()
 	modelMap["not_after"] = model.NotAfter.String()
+	return modelMap, nil
+}
+
+func resourceIbmSmSecretSecretDataToMap(model secretsmanagerv2.SecretDataIntf) (map[string]interface{}, error) {
+	if _, ok := model.(*secretsmanagerv2.ImportedCertificatePayload); ok {
+		return resourceIbmSmSecretImportedCertificatePayloadToMap(model.(*secretsmanagerv2.ImportedCertificatePayload))
+	} else if _, ok := model.(*secretsmanagerv2.PublicCertificatePayload); ok {
+		return resourceIbmSmSecretPublicCertificatePayloadToMap(model.(*secretsmanagerv2.PublicCertificatePayload))
+	} else if _, ok := model.(*secretsmanagerv2.SecretData); ok {
+		modelMap := make(map[string]interface{})
+		model := model.(*secretsmanagerv2.SecretData)
+		if model.Certificate != nil {
+			modelMap["certificate"] = model.Certificate
+		}
+		if model.Intermediate != nil {
+			modelMap["intermediate"] = model.Intermediate
+		}
+		if model.PrivateKey != nil {
+			modelMap["private_key"] = model.PrivateKey
+		}
+		return modelMap, nil
+	} else {
+		return nil, fmt.Errorf("Unrecognized secretsmanagerv2.SecretDataIntf subtype encountered")
+	}
+}
+
+func resourceIbmSmSecretImportedCertificatePayloadToMap(model *secretsmanagerv2.ImportedCertificatePayload) (map[string]interface{}, error) {
+	modelMap := make(map[string]interface{})
+	modelMap["certificate"] = model.Certificate
+	if model.Intermediate != nil {
+		modelMap["intermediate"] = model.Intermediate
+	}
+	if model.PrivateKey != nil {
+		modelMap["private_key"] = model.PrivateKey
+	}
+	return modelMap, nil
+}
+
+func resourceIbmSmSecretPublicCertificatePayloadToMap(model *secretsmanagerv2.PublicCertificatePayload) (map[string]interface{}, error) {
+	modelMap := make(map[string]interface{})
+	modelMap["certificate"] = model.Certificate
+	modelMap["intermediate"] = model.Intermediate
+	modelMap["private_key"] = model.PrivateKey
 	return modelMap, nil
 }

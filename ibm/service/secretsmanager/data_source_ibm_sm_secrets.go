@@ -14,7 +14,6 @@ import (
 
 	"github.com/IBM-Cloud/secrets-manager-mt-go-sdk/secretsmanagerv2"
 	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/conns"
-	"github.com/IBM-Cloud/terraform-provider-ibm/ibm/flex"
 )
 
 func DataSourceIbmSmSecrets() *schema.Resource {
@@ -22,6 +21,48 @@ func DataSourceIbmSmSecrets() *schema.Resource {
 		ReadContext: dataSourceIbmSmSecretsRead,
 
 		Schema: map[string]*schema.Schema{
+			"first": &schema.Schema{
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "A url pointer to the first page in a collection.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"href": &schema.Schema{
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "A url pointer to a page in a collection.",
+						},
+					},
+				},
+			},
+			"previous": &schema.Schema{
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "A url pointer to the previous page in a collection.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"href": &schema.Schema{
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "A url pointer to a page in a collection.",
+						},
+					},
+				},
+			},
+			"last": &schema.Schema{
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "A url pointer to the last page in a collection.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"href": &schema.Schema{
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "A url pointer to a page in a collection.",
+						},
+					},
+				},
+			},
 			"secrets": &schema.Schema{
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -85,6 +126,11 @@ func DataSourceIbmSmSecrets() *schema.Resource {
 							Type:        schema.TypeInt,
 							Computed:    true,
 							Description: "The number of versions the secret has.",
+						},
+						"locks_total": &schema.Schema{
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The number of locks the secret has.",
 						},
 						"expiration_date": &schema.Schema{
 							Type:        schema.TypeString,
@@ -167,11 +213,6 @@ func DataSourceIbmSmSecrets() *schema.Resource {
 					},
 				},
 			},
-			"total_count": &schema.Schema{
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Description: "The total number of resources in a collection.",
-			},
 		},
 	}
 }
@@ -184,30 +225,31 @@ func dataSourceIbmSmSecretsRead(context context.Context, d *schema.ResourceData,
 
 	listSecretsOptions := &secretsmanagerv2.ListSecretsOptions{}
 
-	secretMetadataCollection, response, err := secretsManagerClient.ListSecretsWithContext(context, listSecretsOptions)
+	var pager *secretsmanagerv2.SecretsPager
+	pager, err = secretsManagerClient.NewSecretsPager(listSecretsOptions)
 	if err != nil {
-		log.Printf("[DEBUG] ListSecretsWithContext failed %s\n%s", err, response)
-		return diag.FromErr(fmt.Errorf("ListSecretsWithContext failed %s\n%s", err, response))
+		return diag.FromErr(err)
+	}
+
+	allItems, err := pager.GetAll()
+	if err != nil {
+		log.Printf("[DEBUG] SecretsPager.GetAll() failed %s", err)
+		return diag.FromErr(fmt.Errorf("SecretsPager.GetAll() failed %s", err))
 	}
 
 	d.SetId(dataSourceIbmSmSecretsID(d))
 
-	secrets := []map[string]interface{}{}
-	if secretMetadataCollection.Secrets != nil {
-		for _, modelItem := range secretMetadataCollection.Secrets {
-			modelMap, err := dataSourceIbmSmSecretsSecretMetadataToMap(modelItem)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-			secrets = append(secrets, modelMap)
+	mapSlice := []map[string]interface{}{}
+	for _, modelItem := range allItems {
+		modelMap, err := dataSourceIbmSmSecretsSecretMetadataToMap(modelItem)
+		if err != nil {
+			return diag.FromErr(err)
 		}
-	}
-	if err = d.Set("secrets", secrets); err != nil {
-		return diag.FromErr(fmt.Errorf("Error setting secrets %s", err))
+		mapSlice = append(mapSlice, modelMap)
 	}
 
-	if err = d.Set("total_count", flex.IntValue(secretMetadataCollection.TotalCount)); err != nil {
-		return diag.FromErr(fmt.Errorf("Error setting total_count: %s", err))
+	if err = d.Set("secrets", mapSlice); err != nil {
+		return diag.FromErr(fmt.Errorf("Error setting secrets %s", err))
 	}
 
 	return nil
@@ -216,6 +258,30 @@ func dataSourceIbmSmSecretsRead(context context.Context, d *schema.ResourceData,
 // dataSourceIbmSmSecretsID returns a reasonable ID for the list.
 func dataSourceIbmSmSecretsID(d *schema.ResourceData) string {
 	return time.Now().UTC().String()
+}
+
+func dataSourceIbmSmSecretsSecretMetadataPaginatedCollectionFirstToMap(model *secretsmanagerv2.SecretMetadataPaginatedCollectionFirst) (map[string]interface{}, error) {
+	modelMap := make(map[string]interface{})
+	if model.Href != nil {
+		modelMap["href"] = *model.Href
+	}
+	return modelMap, nil
+}
+
+func dataSourceIbmSmSecretsSecretMetadataPaginatedCollectionPreviousToMap(model *secretsmanagerv2.SecretMetadataPaginatedCollectionPrevious) (map[string]interface{}, error) {
+	modelMap := make(map[string]interface{})
+	if model.Href != nil {
+		modelMap["href"] = *model.Href
+	}
+	return modelMap, nil
+}
+
+func dataSourceIbmSmSecretsSecretMetadataPaginatedCollectionLastToMap(model *secretsmanagerv2.SecretMetadataPaginatedCollectionLast) (map[string]interface{}, error) {
+	modelMap := make(map[string]interface{})
+	if model.Href != nil {
+		modelMap["href"] = *model.Href
+	}
+	return modelMap, nil
 }
 
 func dataSourceIbmSmSecretsSecretMetadataToMap(model secretsmanagerv2.SecretMetadataIntf) (map[string]interface{}, error) {
@@ -258,6 +324,9 @@ func dataSourceIbmSmSecretsSecretMetadataToMap(model secretsmanagerv2.SecretMeta
 		}
 		if model.VersionsTotal != nil {
 			modelMap["versions_total"] = *model.VersionsTotal
+		}
+		if model.LocksTotal != nil {
+			modelMap["locks_total"] = *model.LocksTotal
 		}
 		if model.ExpirationDate != nil {
 			modelMap["expiration_date"] = model.ExpirationDate.String()
@@ -360,6 +429,9 @@ func dataSourceIbmSmSecretsPublicCertificateMetadataToMap(model *secretsmanagerv
 	if model.VersionsTotal != nil {
 		modelMap["versions_total"] = *model.VersionsTotal
 	}
+	if model.LocksTotal != nil {
+		modelMap["locks_total"] = *model.LocksTotal
+	}
 	if model.ExpirationDate != nil {
 		modelMap["expiration_date"] = model.ExpirationDate.String()
 	}
@@ -429,6 +501,9 @@ func dataSourceIbmSmSecretsImportedCertificateMetadataToMap(model *secretsmanage
 	}
 	if model.VersionsTotal != nil {
 		modelMap["versions_total"] = *model.VersionsTotal
+	}
+	if model.LocksTotal != nil {
+		modelMap["locks_total"] = *model.LocksTotal
 	}
 	if model.ExpirationDate != nil {
 		modelMap["expiration_date"] = model.ExpirationDate.String()
